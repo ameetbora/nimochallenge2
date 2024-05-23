@@ -14,9 +14,9 @@ env:
   PIPELINE_USER_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   SAM_TEMPLATE: template.yaml
   TESTING_STACK_NAME: crypto-search-dev
-  TESTING_PIPELINE_EXECUTION_ROLE: arn:aws:iam::874930499144:role/aws-sam-cli-managed-dev-pipel-PipelineExecutionRole-EhtilKhPyxUf
-  TESTING_CLOUDFORMATION_EXECUTION_ROLE: arn:aws:iam::874930499144:role/aws-sam-cli-managed-dev-p-CloudFormationExecutionRo-c8NnrMNe0fio
-  TESTING_ARTIFACTS_BUCKET: aws-sam-cli-managed-dev-pipeline-r-artifactsbucket-ptwyigjmqiki
+  TESTING_PIPELINE_EXECUTION_ROLE: arn:aws:iam::874930499144:role/aws-sam-cli-managed-dev-pipel-PipelineExecutionRole-uwA8qyGIw9Eg
+  TESTING_CLOUDFORMATION_EXECUTION_ROLE: arn:aws:iam::874930499144:role/aws-sam-cli-managed-dev-p-CloudFormationExecutionRo-meMYrs9wwiUc
+  TESTING_ARTIFACTS_BUCKET: aws-sam-cli-managed-dev-pipeline-r-artifactsbucket-q2ny5lzmxy8f
   # If there are functions with "Image" PackageType in your template,
   # uncomment the line below and add "--image-repository ${TESTING_IMAGE_REPOSITORY}" to
   # testing "sam package" and "sam deploy" commands.
@@ -83,11 +83,6 @@ jobs:
       - uses: aws-actions/setup-sam@v2
         with:
           use-installer: true
-      - name: Install Node.js dependencies
-        run: |
-          cd lambda
-          npm install
-          cd ..    
       - run: sam build --template ${SAM_TEMPLATE} --use-container
 
       - name: Assume the testing pipeline user role
@@ -120,15 +115,9 @@ jobs:
       - uses: aws-actions/setup-sam@v2
         with:
           use-installer: true
-      - name: Install Node.js dependencies
-              run: |
-                cd lambda
-                npm install
-                cd ..
 
       - name: Build resources
         run: sam build --template ${SAM_TEMPLATE} --use-container
-             
 
       - name: Assume the testing pipeline user role
         uses: aws-actions/configure-aws-credentials@v1-node16
@@ -204,7 +193,7 @@ jobs:
         run: |
           sam deploy --stack-name ${TESTING_STACK_NAME} \
             --template packaged-testing.yaml \
-            --capabilities CAPABILITY_IAM  CAPABILITY_NAMED_IAM \
+            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
             --region ${TESTING_REGION} \
             --s3-bucket ${TESTING_ARTIFACTS_BUCKET} \
             --no-fail-on-empty-changeset \
@@ -250,7 +239,7 @@ jobs:
         run: |
           sam deploy --stack-name ${PROD_STACK_NAME} \
             --template packaged-prod.yaml \
-            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
+            --capabilities CAPABILITY_IAM  CAPABILITY_NAMED_IAM \
             --region ${PROD_REGION} \
             --s3-bucket ${PROD_ARTIFACTS_BUCKET} \
             --no-fail-on-empty-changeset \
