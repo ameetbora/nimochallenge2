@@ -8,7 +8,7 @@ Resources:
   CryptoPriceHistoryTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: crypto-price-history
+      TableName: crypto-price-search-history
       AttributeDefinitions:
         - AttributeName: id
           AttributeType: N
@@ -21,7 +21,7 @@ Resources:
   CryptoApiRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: crypto-api-role
+      RoleName: crypto-search-api-role
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
