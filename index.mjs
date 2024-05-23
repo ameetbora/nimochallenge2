@@ -74,7 +74,7 @@ const sendEmail = async (data, cryptoName, email) => {
         Body: {
           Text: { Data: `The current price of ${cryptoName} in AUD is ${data[cryptoName].aud}` },
         },
-        Subject: { Data: "Crypto Data Saved Successfully" },
+        Subject: { Data: "Crypto Data Saved Successfully !!!" },
       },
       Source: process.env.DEFAULT_EMAIL,
     };
