@@ -14,18 +14,18 @@ env:
   PIPELINE_USER_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   SAM_TEMPLATE: template.yaml
   TESTING_STACK_NAME: crypto-search-nimo-dev
-  TESTING_PIPELINE_EXECUTION_ROLE: arn:aws:iam::874930499144:role/aws-sam-cli-managed-dev-pipel-PipelineExecutionRole-L8eDTOX3ytcU
-  TESTING_CLOUDFORMATION_EXECUTION_ROLE: arn:aws:iam::874930499144:role/aws-sam-cli-managed-dev-p-CloudFormationExecutionRo-ZewaQXGZhcw6
-  TESTING_ARTIFACTS_BUCKET: aws-sam-cli-managed-dev-pipeline-r-artifactsbucket-cyguanzhlqze
+  TESTING_PIPELINE_EXECUTION_ROLE: arn:aws:iam::874930499144:role/aws-sam-cli-managed-dev-pipel-PipelineExecutionRole-jy9g1FiJhjsI
+  TESTING_CLOUDFORMATION_EXECUTION_ROLE: arn:aws:iam::874930499144:role/aws-sam-cli-managed-dev-p-CloudFormationExecutionRo-WyeCVvlPaCE7
+  TESTING_ARTIFACTS_BUCKET: aws-sam-cli-managed-dev-pipeline-r-artifactsbucket-gydmrjylsiu4
   # If there are functions with "Image" PackageType in your template,
   # uncomment the line below and add "--image-repository ${TESTING_IMAGE_REPOSITORY}" to
   # testing "sam package" and "sam deploy" commands.
   # TESTING_IMAGE_REPOSITORY = '0123456789.dkr.ecr.region.amazonaws.com/repository-name'
   TESTING_REGION: us-east-1
   PROD_STACK_NAME: crypto-search-nimo-prod
-  PROD_PIPELINE_EXECUTION_ROLE: arn:aws:iam::874930499144:role/aws-sam-cli-managed-prod-pipe-PipelineExecutionRole-OTqUMHBO3Igt
-  PROD_CLOUDFORMATION_EXECUTION_ROLE: arn:aws:iam::874930499144:role/aws-sam-cli-managed-prod--CloudFormationExecutionRo-DvgISbRtiPPZ
-  PROD_ARTIFACTS_BUCKET: aws-sam-cli-managed-prod-pipeline--artifactsbucket-2xtlloygjslq
+  PROD_PIPELINE_EXECUTION_ROLE: arn:aws:iam::874930499144:role/aws-sam-cli-managed-prod-pipe-PipelineExecutionRole-zLq0SnSptjsU
+  PROD_CLOUDFORMATION_EXECUTION_ROLE: arn:aws:iam::874930499144:role/aws-sam-cli-managed-prod--CloudFormationExecutionRo-p50qfyiHb6Ro
+  PROD_ARTIFACTS_BUCKET: aws-sam-cli-managed-prod-pipeline--artifactsbucket-vq5rlpjvg1bb
   # If there are functions with "Image" PackageType in your template,
   # uncomment the line below and add "--image-repository ${PROD_IMAGE_REPOSITORY}" to
   # prod "sam package" and "sam deploy" commands.
@@ -196,10 +196,8 @@ jobs:
             --capabilities CAPABILITY_IAM \
             --region ${TESTING_REGION} \
             --s3-bucket ${TESTING_ARTIFACTS_BUCKET} \
-            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
             --no-fail-on-empty-changeset \
             --role-arn ${TESTING_CLOUDFORMATION_EXECUTION_ROLE}
-            --no-confirm-changeset
 
   integration-test:
     if: github.ref == 'refs/heads/main'
@@ -244,7 +242,5 @@ jobs:
             --capabilities CAPABILITY_IAM \
             --region ${PROD_REGION} \
             --s3-bucket ${PROD_ARTIFACTS_BUCKET} \
-            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
             --no-fail-on-empty-changeset \
             --role-arn ${PROD_CLOUDFORMATION_EXECUTION_ROLE}
-            --no-confirm-changeset
