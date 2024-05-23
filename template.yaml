@@ -5,7 +5,7 @@ Description: AWS SAM template for creating a REST API Gateway, Lambda function, 
 Parameters:
   EnvFile:
     Type: String
-    Description: .env
+    Description: Location for env file
 
 Resources:
 
