@@ -1,0 +1,119 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS SAM template for creating a REST API Gateway, Lambda function, and DynamoDB table
+
+Resources:
+
+  # DynamoDB Table
+  CryptoPriceHistoryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: crypto-price-history
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: N
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  # IAM Role
+  CryptoApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: crypto-api-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+        - arn:aws:iam::aws:policy/AmazonSESFullAccess
+      Policies:
+        - PolicyName: LambdaExecutionRole
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: '*'
+
+  # Lambda Function
+  CryptoPriceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: index.handler
+      Runtime: nodejs20.x
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CryptoPriceHistoryTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CryptoPriceHistoryTable
+      Role: !GetAtt CryptoApiRole.Arn      
+
+  # API Gateway
+  CryptoPriceApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      DefinitionBody:
+        swagger: "2.0"
+        info:
+          title: !Sub "${AWS::StackName} API"
+        paths:
+          /getCryptoPrice:
+            get:
+              parameters:
+                - name: email
+                  in: query
+                  required: true
+                  type: string
+                - name: cryptoName
+                  in: query
+                  required: true
+                  type: string
+              responses:
+                "200":
+                  description: "200 response"
+                "400":
+                  description: "400 response"
+              x-amazon-apigateway-integration:
+                uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CryptoPriceFunction.Arn}/invocations"
+                httpMethod: POST
+                type: aws_proxy
+          /getSearchHistory:
+            get:
+              responses:
+                "200":
+                  description: "200 response"
+                "400":
+                  description: "400 response"
+              x-amazon-apigateway-integration:
+                uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CryptoPriceFunction.Arn}/invocations"
+                httpMethod: POST
+                type: aws_proxy
+
+  # Permission to allow API Gateway to invoke the Lambda function
+  ApiGatewayInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt CryptoPriceFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${CryptoPriceApi}/*
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub "https://${CryptoPriceApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
